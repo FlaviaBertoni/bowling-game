@@ -1,29 +1,28 @@
-const normalizeFrames = (frames, normalizedFrame=[], index=0) => {
-    if(normalizedFrame.length === 10) return normalizedFrame;
+const createTotalPointsFrames = (rolls, frames = [], index = 0) => {
+    if(frames.length === 10) return frames;
 
-    const frameSum = frames[index] + frames[index+1];
+    const currentRoll = rolls[index];
+    const currentRollAndNextRollSum = currentRoll + rolls[index + 1];
 
-    const isStrike = frames[index] === 10;
-    const isSpare = frameSum === 10;
+    const isStrike = currentRoll === 10;
+    const isSpare = currentRollAndNextRollSum === 10;
 
     if(isStrike || isSpare) {
-        const points = frameSum + frames[index+2];
+        const points = currentRollAndNextRollSum + rolls[index + 2];
         const nextIndex = isStrike ? index + 1 : index + 2;
-        return normalizeFrames(frames, [... normalizedFrame, points] , nextIndex);
+
+        return createTotalPointsFrames(rolls, [...frames, points] , nextIndex);
     }
 
-    return normalizeFrames(frames, [... normalizedFrame, frameSum] , index+2);
+    return createTotalPointsFrames(rolls, [...frames, currentRollAndNextRollSum] , index + 2);
 };
 
-const score = (frames=[]) => {
-    const normalizedFrames = normalizeFrames(frames);
-    return normalizedFrames.reduce((acc, cur) => acc + cur);
+const score = (rolls = []) => {
+    const frames = createTotalPointsFrames(rolls);
+    return frames.reduce((totalPoints, currentPoint) => totalPoints + currentPoint);
 };
 
-const roll = (pins=0, repeat=0, accumulator=0, accumulatedRolls=[]) => {
-    if(accumulator === repeat) return accumulatedRolls;
-    return roll(pins, repeat, accumulator + 1, accumulatedRolls.concat(pins))
-};
+const roll = (pins = 0, accumulatedRolls = []) => [...accumulatedRolls, pins];
 
 export {
     roll,
